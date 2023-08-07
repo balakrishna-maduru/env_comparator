@@ -1,9 +1,10 @@
 import os
 from env_comparator.compare_utils import Operands
 
+
 class Compare(Operands):
 
-    def __init__(self, input1, input2, title1=None, title2=None):
+    def __init__(self, input1: str, input2: str, title1: str = None, title2: str = None):
         super().__init__()
         self.requirements1 = self.read_requirements(input1)
         self.requirements2 = self.read_requirements(input2)
@@ -12,7 +13,7 @@ class Compare(Operands):
         self.status = {}
         self._compare()
 
-    def get_results(self,):
+    def get_results(self):
         return self.status
 
     def get_status(self):
@@ -55,3 +56,8 @@ class Compare(Operands):
         for key, value in self.status.items():
             self._update_status(key, value)
 
+    def is_subset(self):
+        for key, value in self.status.items():
+            if value[self.title1] == "Missing":
+                return False
+        return True
