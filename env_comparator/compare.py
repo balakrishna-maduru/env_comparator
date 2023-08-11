@@ -1,5 +1,5 @@
 import os
-from env_comparator.compare_utils import Operands
+from compare_utils import Operands
 
 
 class Compare(Operands):
@@ -17,16 +17,21 @@ class Compare(Operands):
             if value[self.title2] == "Missing":
                 return False
         return True
-    
+
     def get_status(self):
-        line = "-"*101
-        print(line)
-        print(f"|{'Package':^30}|{self.title1:^25}|{self.title2:^25}|{'Status':^16}|")
-        print(line)
-        for key, value in self.status.items():
+        line = "-"*111
+        for files_status in self.status:
+            print(line)
             print(
-                f"|{key:30}|{value.get(self.title1,''):25}|{value.get(self.title2,''):25}|{value.get('status',''):16}|")
-        print(line)
+                f"|file1 :{files_status['file']:30}|file2 :{files_status['compared_file']:30}| is subset :{str(files_status['is_subset']):21}|")
+            print(line)
+            print(
+                f"|{'Package':^30}|{self.title1:^30}|{self.title2:^30}|{'Status':^16}|")
+            print(line)
+            for key, value in files_status["libraries"].items():
+                print(
+                    f"|{key:30}|{value.get(self.title1,''):30}|{value.get(self.title2,''):30}|{value.get('status',''):16}|")
+            print(line)
 
     def _insert(self, requirements, title):
         for key, value in requirements.items():
@@ -34,7 +39,7 @@ class Compare(Operands):
                 self._differ[key] = {}
             self._differ[key][title] = value
 
-    def _update_status_ob_both(self, key, value):
+    def _update_status_on_both(self, key, value):
         if value[self.title1] == value[self.title2]:
             self._differ[key]["status"] = 'OK'
         else:
@@ -46,7 +51,7 @@ class Compare(Operands):
 
     def _update_status(self, key, value):
         if self.title1 in value and self.title2 in value:
-            self._update_status_ob_both(key, value)
+            self._update_status_on_both(key, value)
         elif self.title1 not in value:
             self._update_status_on_title(key, self.title1)
         else:
@@ -65,15 +70,15 @@ class Compare(Operands):
         self._insert(self.requirements2, self.title2)
         for key, value in self._differ.items():
             self._update_status(key, value)
-        self.status.append({ "is_subset": self._is_subset(),
-        "file": self.title1,
-        "compared_file": self.title2,
-        "libraries": self._differ})
+        self.status.append({"is_subset": self._is_subset(),
+                            "file": self.title1,
+                            "compared_file": self.title2,
+                            "libraries": self._differ})
 
     def _compare(self, input1, input2):
         if os.path.isdir(input2):
-            for folder,sub_folder, files in os.walk(input2):
+            for folder, sub_folder, files in os.walk(input2):
                 for file in files:
-                    self._do_compare(input1,os.path.join(folder,file))            
+                    self._do_compare(input1, os.path.join(folder, file))
         else:
             self._do_compare(input1, input2)
