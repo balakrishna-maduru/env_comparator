@@ -1,5 +1,5 @@
 import os
-from compare_utils import Operands
+from env_comparator.compare_utils import Operands
 
 
 class Compare(Operands):
